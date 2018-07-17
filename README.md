@@ -22,4 +22,4 @@
 
 > python create-mymaps-importable.py input.yaml output.kml
 
-Ако всичко е наред, сега можеш да импортираш генерирания output.kml в Google My Maps - [инструкции](https://support.google.com/mymaps/answer/3024836?hl=en&ref_topic=3024924).
+Ако всичко е наред, сега можеш да импортираш генерирания `output.kml` в Google My Maps - [инструкции](https://support.google.com/mymaps/answer/3024836?hl=en&ref_topic=3024924).
