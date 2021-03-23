@@ -11,21 +11,47 @@
 ## Употреба
 
 ### Входен документ
-Виж шаблона [input.yaml.example](input.yaml.example) за примерен входен документ с 2 обекта. Направи своя входен документ, като за всеки обект:
+Добавяме обектите които ни интересуват във списъка (като ги намираме по някакъв начин и натискаме + до тях). После за да обработим всички във списъка изпълняваме следното в конзолата на Браузъра:
 
-1. Попълни `name` (по избор, но в примера е формата който ми харесва) и `size` (площ в метри)
-2. Попълни `edges`, като вземеш информацията от [Кадастрално-административна информационна система](kais.cadastre.bg)>Карта:
+```
+records = [];
+printRecord = (number, label, data) => {
+  record = `- name: ${label}\n`
+  record += `  edges: |\n`;
+  edges = data.split('((')[1].split('))')[0].split(',').map($.trim).map((d)=>d.split(' '))
+  for (i = 0; i < edges.length; ++i) {
+    wgs84 = proj4('EPSG:8122').inverse(edges[i])
+    record += `    ${wgs84}\n`;
+  }
+  records.push(record);
+}
+objects = $('div#selectedList div.object')
+for (i = 0; i < objects.length; ++i) {
+  o = objects[i];
+  id = $(o).find('.resultObjectId').attr('value')
+  type = $(o).find('.resultObjectType').attr('value')
+  subtype = $(o).find('.resultObjectSubType').attr('value')
+  number = $(o).find('.resultObjectNumber').attr('value')
+  label = $.trim($(o).find('.label').text())
+  $.get(`https://kais.cadastre.bg/bg/Map/GetObjectGeometryByIdAndType/?id=${id}&type=${type}&subTypeId=${subtype}`, (data) => printRecord(number, label, data)).then(() => console.log('Done!'))
+}
+```
 
-  Използвай търсенето за да намериш обекта, който те интересува. Избери координатна система `WGS UTM 35N` (може да се наложи да отвориш картата в пълен екран за да видиш долу в ляво настройките). После отвори конзолата на браузъра (`CTRL+SHIFT+K` във Firefox, `CTRL+SHIFT+J` в Chrome), напиши следната команда:
+Като това свърши:
 
-  > $('.ol-mouse-position').text().split(' ').slice(3).map(c => parseFloat(c)).join(" ")
+```
+records.join('\n')
+```
 
-  Придвижи курсора на мишката върху един от ръбовете на обекта и натисни `Enter` за да изпълниш горната командата в конзолата. Това  което командата прави е да изведе координатите на този ръб в конзолата. Копирай тези координати на нов ред под `edges |`. После придвижи курсора на друг ръб (под ред, или по или обратно на часовниковата стрелка) и направи същото.
+Това за сега взима само първите 10 запазени обекта.
+
 
 ### Генериране на изходен документ
 
 Когато попълниш входния документ, кръстен например `input.yaml`, изпълни следната команда:
 
-> python create-mymaps-importable.py input.yaml output.kml
+> python create-mymaps-importable.py -i input.yaml output.kml
+
+Може вместо `-i input.yaml` да копираш входните данни и питонския скрипт ще ги намери.
 
 Ако всичко е наред, сега можеш да импортираш генерирания `output.kml` в Google My Maps - [инструкции](https://support.google.com/mymaps/answer/3024836?hl=en&ref_topic=3024924).

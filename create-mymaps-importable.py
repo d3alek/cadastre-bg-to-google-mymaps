@@ -6,6 +6,14 @@ import subprocess
 from pathlib import Path
 import textwrap
 
+import tkinter as tk
+
+def get_clipboard_text():
+    root = tk.Tk()
+    # keep the window from showing
+    root.withdraw()
+    return root.clipboard_get()
+
 KML_FORMAT = """
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -17,7 +25,7 @@ KML_FORMAT = """
 
 KML_PLACEMARK = """<Placemark>
     <name>{name}</name>
-    <description>{size_dka} дка
+    <description>
     {description}
     </description>
     <Polygon>
@@ -53,26 +61,30 @@ if __name__ == "__main__":
     doctest.testmod()
 
     parser = ArgumentParser()
-    parser.add_argument('input_file', help='Path to yaml file manually written from kais.cadastre.bg data')
-    parser.add_argument('output_file', help='Path to output the KML file ready to import into Google My Maps')
+    parser.add_argument('--input', '-i', help='Path to yaml file manually written from kais.cadastre.bg data')
+    parser.add_argument('output', help='Path to output the KML file ready to import into Google My Maps')
 
     args = parser.parse_args()
 
-    with open(args.input_file) as f:
-        data = yaml.load(f)
+    if args.input:
+        with open(args.input) as f:
+            data = yaml.load(f)
+    else:
+        # use text in clipboard
+        data = yaml.load(get_clipboard_text())
 
     placemarks = []
     for land in data:
-        coordinates = '\n'.join(map(call_cs2cs, land['edges'].splitlines()))
+        coordinates = land['edges']
         placemarks.append(
                 KML_PLACEMARK.format(
                     name=land['name'], 
-                    size_dka=int(land['size'])/1000,
+                    size_dka=int(land.get('size',0))/1000,
                     description=land.get('description',''),
                     coordinates=textwrap.indent(coordinates, 20*' ')))
 
-    with open(args.output_file, 'w') as f:
+    with open(args.output, 'w') as f:
         f.write(KML_FORMAT % textwrap.indent('\n'.join(placemarks), 8*' '))
 
-    print("Written %d lands to %s." % (len(placemarks), args.output_file))
+    print("Written %d lands to %s." % (len(placemarks), args.output))
 
