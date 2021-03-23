@@ -17,7 +17,9 @@ KML_FORMAT = """
 
 KML_PLACEMARK = """<Placemark>
     <name>{name}</name>
-    <description>{size_dka} дка</description>
+    <description>{size_dka} дка
+    {description}
+    </description>
     <Polygon>
         <extrude>1</extrude>
         <altitudeMode>relativeToGround</altitudeMode>
@@ -35,6 +37,8 @@ def call_cs2cs(wgs_utm_32n_coordinates):
     """
     >>> call_cs2cs("4747080 309559")
     '24.669154,42.852584'
+    >>> call_cs2cs("4747080.30 309559")
+    '24.669154,42.852587'
     """
     cwd = Path(__file__).parents[0].absolute()
     split = wgs_utm_32n_coordinates.split(' ')
@@ -64,6 +68,7 @@ if __name__ == "__main__":
                 KML_PLACEMARK.format(
                     name=land['name'], 
                     size_dka=int(land['size'])/1000,
+                    description=land.get('description',''),
                     coordinates=textwrap.indent(coordinates, 20*' ')))
 
     with open(args.output_file, 'w') as f:
