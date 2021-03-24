@@ -2,10 +2,7 @@
 
 from argparse import ArgumentParser
 import yaml
-import subprocess
-from pathlib import Path
 import textwrap
-
 import tkinter as tk
 
 def get_clipboard_text():
@@ -25,9 +22,7 @@ KML_FORMAT = """
 
 KML_PLACEMARK = """<Placemark>
     <name>{name}</name>
-    <description>
-    {description}
-    </description>
+    <description>{description}</description>
     <Polygon>
         <extrude>1</extrude>
         <altitudeMode>relativeToGround</altitudeMode>
@@ -40,21 +35,6 @@ KML_PLACEMARK = """<Placemark>
         </outerBoundaryIs>
     </Polygon>
 </Placemark>"""
-
-def call_cs2cs(wgs_utm_32n_coordinates):
-    """
-    >>> call_cs2cs("4747080 309559")
-    '24.669154,42.852584'
-    >>> call_cs2cs("4747080.30 309559")
-    '24.669154,42.852587'
-    """
-    cwd = Path(__file__).parents[0].absolute()
-    split = wgs_utm_32n_coordinates.split(' ')
-    if len(split) != 2:
-        return ''
-    result = subprocess.run([str(cwd)+'/cs2cs-cadastre-to-maps.sh', split[0], split[1]], stdout=subprocess.PIPE)
-    result_split = str(result.stdout, 'utf-8').split('\t')
-    return result_split[0] + ',' + result_split[1].split(' ')[0]
 
 if __name__ == "__main__":
     import doctest
