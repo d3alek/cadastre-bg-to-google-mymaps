@@ -33,6 +33,7 @@ processDescription = (number) => (data) => {
   records[number]['description'] = data
 }
 printRecords = () => {
+  console.log('! For clipboard copy to work, interact with the map now');
   setTimeout(async () => {
     printed = ""
     for (record in records) {
@@ -64,10 +65,11 @@ for (i = 0; i < objects.length; ++i) {
 Като това свърши:
 
 ```
-printedRecords.join('\n')
+printRecords()
+
 ```
 
-Това за сега взима само първите 10 запазени обекта.
+Това за сега взима само първите 10 запазени обекта. Опитва да ги копира автоматично (ако изпише `Copied to clipboard successfully!` значи е успяло), така че да можеш направо да ги поставиш (Paste) в `input.yaml`.
 
 
 ### Генериране на изходен документ
